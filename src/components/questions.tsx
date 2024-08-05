@@ -14,6 +14,7 @@ const Questions: React.FC = () => {
   const [data, setData] = useState<DataItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+  const [currentQuestion, setCurrentQuestion] = useState<DataItem | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -27,11 +28,10 @@ const Questions: React.FC = () => {
 
         const accessedData = await response.json();
         setData(accessedData);
+        setCurrentQuestion(accessedData[Math.floor(Math.random() * accessedData.length)]);
       } catch (error) {
-
         setIsError(true);
         console.error("Fetching error:", error);
-
       } finally {
         setIsLoading(false);
       }
@@ -42,24 +42,21 @@ const Questions: React.FC = () => {
 
   const getRandomQuestion = () => {
     const randomIndex = Math.floor(Math.random() * data.length);
-
-    return data[randomIndex]
+    setCurrentQuestion(data[randomIndex]);
   };
 
-  const randomQuestion = getRandomQuestion()
-
-  console.log(data)
+  console.log(data);
 
   return (
     <>
       {isLoading && <h2>Loading...</h2>}
       {isError && <p>There was an error loading the data. Please try again later.</p>}
-      {!isLoading && !isError && data.length > 0 && (
-
+      {!isLoading && !isError && currentQuestion && (
         <div>
-            <p>{randomQuestion.question}</p>
+          <p>{currentQuestion.question}</p>
+          <p>{currentQuestion.correctAnswer}</p>
+          <button onClick={getRandomQuestion}>Next</button>
         </div>
-        
       )}
     </>
   );
