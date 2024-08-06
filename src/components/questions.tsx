@@ -6,7 +6,7 @@ interface DataItem {
   id: string; 
   question: string;
   correctAnswer: string;
-  incorrectAnswers: string;
+  incorrectAnswers: string[];
   category: string;
 }
 
@@ -28,6 +28,7 @@ const Questions: React.FC = () => {
 
         const accessedData = await response.json();
         setData(accessedData);
+        /* set precedence with the first random question */
         setCurrentQuestion(accessedData[Math.floor(Math.random() * accessedData.length)]);
       } catch (error) {
         setIsError(true);
@@ -45,13 +46,25 @@ const Questions: React.FC = () => {
     setCurrentQuestion(data[randomIndex]);
   };
 
- 
-  let correctAns = currentQuestion?.correctAnswer ?? "";
-  let incorrectAns = currentQuestion?.incorrectAnswers ?? [];
 
-  const options = [correctAns, ...incorrectAns];
+  /* creating a shuffling algorithm using Fisher-Yates Shuffle */
+  const shuffleArray = <T,>(arr: T[]): T[] => {
+    const shuffled = [...arr]; 
+  
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+  
+    return shuffled;
+  };
 
-    console.log("options: ", options)
+  const correctAns = currentQuestion?.correctAnswer ?? "";
+  const incorrectAns = currentQuestion?.incorrectAnswers ?? [];
+
+  const options = shuffleArray([correctAns, ...incorrectAns]);
+  console.log("options: ", options)
+  console.log("correct answer: ", correctAns)
 
   return (
     <>
@@ -60,7 +73,7 @@ const Questions: React.FC = () => {
       {!isLoading && !isError && currentQuestion && (
         <div>
           <p>{currentQuestion.question}</p>
-          <p>{currentQuestion.correctAnswer}</p>
+          
           <button onClick={getRandomQuestion}>Next</button>
         </div>
       )}
