@@ -30,6 +30,7 @@ const Questions: React.FC = () => {
         setData(accessedData);
         /* set precedence with the first random question */
         setCurrentQuestion(accessedData[Math.floor(Math.random() * accessedData.length)]);
+
       } catch (error) {
         setIsError(true);
         console.error("Fetching error:", error);
@@ -46,10 +47,9 @@ const Questions: React.FC = () => {
     setCurrentQuestion(data[randomIndex]);
   };
 
-
-  /* creating a shuffling algorithm using Fisher-Yates Shuffle */
+  /* creating the shuffle algorithm using Fisher-Yates Shuffle */
   const shuffleArray = <T,>(arr: T[]): T[] => {
-    const shuffled = [...arr]; 
+    const shuffled = [...arr];
   
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -63,8 +63,6 @@ const Questions: React.FC = () => {
   const incorrectAns = currentQuestion?.incorrectAnswers ?? [];
 
   const options = shuffleArray([correctAns, ...incorrectAns]);
-  console.log("options: ", options)
-  console.log("correct answer: ", correctAns)
 
   return (
     <>
@@ -73,7 +71,14 @@ const Questions: React.FC = () => {
       {!isLoading && !isError && currentQuestion && (
         <div>
           <p>{currentQuestion.question}</p>
-          
+          <form>
+            {options.map((option, index) => (
+              <div key={index}>
+                <input type="radio" id={`option-${index}`} name="option" value={option} />
+                <label htmlFor={`option-${index}`}>{option}</label>
+              </div>
+            ))}
+          </form>
           <button onClick={getRandomQuestion}>Next</button>
         </div>
       )}
