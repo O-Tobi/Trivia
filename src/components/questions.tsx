@@ -38,14 +38,20 @@ const Questions: React.FC = () => {
     };
 
     fetchData();
-  }, [apiUrl]);
+  }, []);
 
   const getRandomQuestion = () => {
     const randomIndex = Math.floor(Math.random() * data.length);
     setCurrentQuestion(data[randomIndex]);
   };
 
-  console.log(data);
+ 
+  let correctAns = currentQuestion?.correctAnswer ?? "";
+  let incorrectAns = currentQuestion?.incorrectAnswers ?? [];
+
+  const options = [correctAns, ...incorrectAns];
+
+    console.log("options: ", options)
 
   return (
     <>
