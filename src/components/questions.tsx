@@ -15,6 +15,7 @@ const Questions: React.FC = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [currentQuestion, setCurrentQuestion] = useState<DataItem | null>(null);
+  const [time, setTime] = useState<number>(0);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,10 +78,19 @@ const Questions: React.FC = () => {
     if (submittedAnswer.length !== 0) {
       getRandomQuestion();
     }
+    
     form.reset();
 
     console.log("working", submittedAnswer);
   };
+
+  /* create a settimeout here such that once the time runs out, a new question is rendered */
+   useEffect(() => {
+    setTimeout(getRandomQuestion, 5000);
+    
+  }, [handleSubmit]);
+
+  
 
   return (
     <>
@@ -90,6 +100,7 @@ const Questions: React.FC = () => {
       )}
       {!isLoading && !isError && currentQuestion && (
         <div>
+            <h2>Time: {time}</h2>
           <p>{currentQuestion.question}</p>
           <form onSubmit={handleSubmit}>
             {options.map((option, index) => (
