@@ -47,14 +47,14 @@ const Questions: React.FC = () => {
     setCurrentQuestion(data[randomIndex]);
   };
 
-  /* creating the shuffle algorithm using Fisher-Yates Shuffle */
-  const shuffleArray = <T,>(arr: T[]): T[] => {
+   /* creating the shuffle algorithm using Fisher-Yates Shuffle */
+   const shuffleArray = <T,>(arr: T[]): T[] => {
     const shuffled = [...arr];
   
     for (let i = shuffled.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
+       }
   
     return shuffled;
   };
@@ -64,6 +64,13 @@ const Questions: React.FC = () => {
 
   const options = shuffleArray([correctAns, ...incorrectAns]);
 
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const submittedAnswer = (form.elements.namedItem("option") as HTMLInputElement).value; 
+    console.log("working", submittedAnswer);
+  };
+
   return (
     <>
       {isLoading && <h2>Loading...</h2>}
@@ -71,13 +78,14 @@ const Questions: React.FC = () => {
       {!isLoading && !isError && currentQuestion && (
         <div>
           <p>{currentQuestion.question}</p>
-          <form>
+          <form onSubmit={handleSubmit}>
             {options.map((option, index) => (
               <div key={index}>
                 <input type="radio" id={`option-${index}`} name="option" value={option} />
                 <label htmlFor={`option-${index}`}>{option}</label>
               </div>
             ))}
+            <input type="submit" value="Submit" />
           </form>
           <button onClick={getRandomQuestion}>Next</button>
         </div>
