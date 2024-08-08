@@ -14,8 +14,8 @@ const Questions: React.FC = () => {
   const [data, setData] = useState<DataItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-  const [currentQuestion, setCurrentQuestion] = useState<DataItem | null>(null);
-  const [time, setTime] = useState<number>(0);
+  const [currentQuestion, setCurrentQuestion] = useState<number>(0);
+  const [time, setTime] = useState<number>(10);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -29,10 +29,9 @@ const Questions: React.FC = () => {
 
         const accessedData = await response.json();
         setData(accessedData);
-        /* set precedence with the first random question */
-        setCurrentQuestion(
-          accessedData[Math.floor(Math.random() * accessedData.length)]
-        );
+
+        console.log("first question: ", accessedData[0]);
+        console.log("all question", accessedData);
       } catch (error) {
         setIsError(true);
         console.error("Fetching error:", error);
@@ -45,9 +44,10 @@ const Questions: React.FC = () => {
   }, []);
 
   /* change this to get next question instead of random question */
-  const getRandomQuestion = () => {
-    const randomIndex = Math.floor(Math.random() * data.length);
-    setCurrentQuestion(data[randomIndex]);
+  const getNextQuestion = () => {
+    setCurrentQuestion((prevIndex) => (prevIndex + 1) % data.length);
+    /* show score here and end the test */
+    setTime(10);
   };
 
   /* creating the shuffle algorithm using Fisher-Yates Shuffle */
@@ -62,8 +62,9 @@ const Questions: React.FC = () => {
     return shuffled;
   };
 
-  const correctAns = currentQuestion?.correctAnswer ?? "";
-  const incorrectAns = currentQuestion?.incorrectAnswers ?? [];
+  const currentQues = data[currentQuestion];
+  const correctAns = currentQues?.correctAnswer ?? "";
+  const incorrectAns = currentQues?.incorrectAnswers ?? [];
 
   const options = shuffleArray([correctAns, ...incorrectAns]);
 
@@ -76,32 +77,29 @@ const Questions: React.FC = () => {
     /* put a conditional statement that compares submittedAnswer to the correct answer */
     /* create a useState to store correct answer */
     if (submittedAnswer.length !== 0) {
-      getRandomQuestion();
+      getNextQuestion();
     }
-    
+
     form.reset();
 
     console.log("working", submittedAnswer);
   };
 
   /* create a settimeout here such that once the time runs out, a new question is rendered */
-   useEffect(() => {
-    setTimeout(getRandomQuestion, 5000);
-    
-  }, [handleSubmit]);
-
-  
-
+  /* useEffect(() => {
+    setTimeout(getNextQuestion, 10000);
+  }, [handleSubmit, getNextQuestion]);
+ */
   return (
     <>
       {isLoading && <h2>Loading...</h2>}
       {isError && (
         <p>There was an error loading the data. Please try again later.</p>
       )}
-      {!isLoading && !isError && currentQuestion && (
+      {!isLoading && !isError && currentQues && (
         <div>
-            <h2>Time: {time}</h2>
-          <p>{currentQuestion.question}</p>
+          <h2>Time: {time}</h2>
+          <p>{currentQues.question}</p>
           <form onSubmit={handleSubmit}>
             {options.map((option, index) => (
               <div key={index}>
