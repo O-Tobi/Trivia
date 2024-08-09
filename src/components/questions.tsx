@@ -17,7 +17,8 @@ const Questions: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState<number>(0);
   const [time, setTime] = useState<number>(10);
   const [options, setOptions] = useState<string[]>([]);
-  const [score, setScore] = useState<number>(0)
+  const [score, setScore] = useState<number>(0);
+  const [totalQuestions, setTotalQuestions] = useState<number>(10);
 
   // Shuffle array function using Fisher-Yates Algorithm
   const shuffleArray = <T,>(arr: T[]): T[] => {
@@ -37,7 +38,6 @@ const Questions: React.FC = () => {
     return shuffleArray([correctAns, ...incorrectAns]);
   };
 
-
   // Get next Question
   const getNextQuestion = useCallback(() => {
     setCurrentQuestion((prevIndex) => {
@@ -54,6 +54,7 @@ const Questions: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       getNextQuestion();
+      setTotalQuestions((prevState) => prevState - 1);
     }, 10000);
 
     const interval = setInterval(() => {
@@ -89,7 +90,6 @@ const Questions: React.FC = () => {
     fetchData();
   }, []);
 
-  
   // Handling form submission and Score Checker
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -97,21 +97,22 @@ const Questions: React.FC = () => {
     const submittedAnswer = (
       form.elements.namedItem("option") as HTMLInputElement
     ).value;
-    const rightAns = currentQues.correctAnswer
+    const rightAns = currentQues.correctAnswer;
 
-    console.log("right Answer: ", rightAns)
-     if (submittedAnswer === rightAns) {
-      setScore((prevState) => prevState + 1)
+    if (submittedAnswer === rightAns) {
+      setScore((prevState) => prevState + 1);
       getNextQuestion();
+      setTotalQuestions((prevState) => prevState - 1);
     } else if (submittedAnswer.length !== 0) {
       getNextQuestion();
+      setTotalQuestions((prevState) => prevState - 1);
     }
-    
+
     form.reset();
     console.log("Selected answer:", submittedAnswer);
   };
 
- 
+  const finalScore = (score / 10) * 100;
 
   return (
     <>
@@ -119,10 +120,11 @@ const Questions: React.FC = () => {
       {isError && (
         <p>There was an error loading the data. Please try again later.</p>
       )}
-      {!isLoading && !isError && currentQues && (
+      {!isLoading && !isError && currentQues && totalQuestions > 0 && (
         <div>
           <h2>Time: {time}</h2>
-          <h3>{score}</h3>
+          <h3>Total Questions: {totalQuestions}</h3>
+          <h3>Score: {score}</h3>
           <p>{currentQues.question}</p>
           <form onSubmit={handleSubmit}>
             {options.map((option, index) => (
@@ -139,6 +141,10 @@ const Questions: React.FC = () => {
             <input type="submit" value="Submit" />
           </form>
         </div>
+      )}
+
+      {!isLoading && !isError && totalQuestions === 0 && (
+        <h1>You score: {finalScore}%</h1>
       )}
     </>
   );
