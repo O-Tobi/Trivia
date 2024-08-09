@@ -17,6 +17,7 @@ const Questions: React.FC = () => {
   const [currentQuestion, setCurrentQuestion] = useState<number>(0);
   const [time, setTime] = useState<number>(10);
   const [options, setOptions] = useState<string[]>([]);
+  const [score, setScore] = useState<number>(0)
 
   // Shuffle array function using Fisher-Yates Algorithm
   const shuffleArray = <T,>(arr: T[]): T[] => {
@@ -89,16 +90,23 @@ const Questions: React.FC = () => {
   }, []);
 
   
-  // Handling form submission
+  // Handling form submission and Score Checker
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const submittedAnswer = (
       form.elements.namedItem("option") as HTMLInputElement
     ).value;
-    if (submittedAnswer.length !== 0) {
+    const rightAns = currentQues.correctAnswer
+
+    console.log("right Answer: ", rightAns)
+     if (submittedAnswer === rightAns) {
+      setScore((prevState) => prevState + 1)
+      getNextQuestion();
+    } else if (submittedAnswer.length !== 0) {
       getNextQuestion();
     }
+    
     form.reset();
     console.log("Selected answer:", submittedAnswer);
   };
@@ -114,6 +122,7 @@ const Questions: React.FC = () => {
       {!isLoading && !isError && currentQues && (
         <div>
           <h2>Time: {time}</h2>
+          <h3>{score}</h3>
           <p>{currentQues.question}</p>
           <form onSubmit={handleSubmit}>
             {options.map((option, index) => (
