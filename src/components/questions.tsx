@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
 interface DataItem {
-  id: string; 
+  id: string;
   question: string;
   correctAnswer: string;
   incorrectAnswers: string[];
@@ -14,23 +14,69 @@ const Questions: React.FC = () => {
   const [data, setData] = useState<DataItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-  const [currentQuestion, setCurrentQuestion] = useState<DataItem | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<number>(0);
+  const [time, setTime] = useState<number>(10);
+  const [options, setOptions] = useState<string[]>([]);
 
+  // Shuffle array function using Fisher-Yates Algorithm
+  const shuffleArray = <T,>(arr: T[]): T[] => {
+    const shuffled = [...arr];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Shuffling the options
+  const getShuffledOptions = (question: DataItem) => {
+    if (!question) return [];
+    const correctAns = question.correctAnswer;
+    const incorrectAns = question.incorrectAnswers;
+    return shuffleArray([correctAns, ...incorrectAns]);
+  };
+
+
+  // Get next Question
+  const getNextQuestion = useCallback(() => {
+    setCurrentQuestion((prevIndex) => {
+      const nextIndex = (prevIndex + 1) % data.length;
+      setOptions(getShuffledOptions(data[nextIndex]));
+      setTime(10);
+      return nextIndex;
+    });
+  }, [data]);
+
+  const currentQues = data[currentQuestion];
+
+  // Timer and Interval for question timeout
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      getNextQuestion();
+    }, 10000);
+
+    const interval = setInterval(() => {
+      setTime((prevState) => prevState - 1);
+    }, 1000);
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, [currentQuestion, getNextQuestion]);
+
+  // Fetching data from the EndPoint
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
         const response = await fetch(`${apiUrl}?limit=5`);
-
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-
         const accessedData = await response.json();
         setData(accessedData);
-        /* set precedence with the first random question */
-        setCurrentQuestion(accessedData[Math.floor(Math.random() * accessedData.length)]);
-
+        setOptions(getShuffledOptions(accessedData[0]));
       } catch (error) {
         setIsError(true);
         console.error("Fetching error:", error);
@@ -42,44 +88,47 @@ const Questions: React.FC = () => {
     fetchData();
   }, []);
 
-  const getRandomQuestion = () => {
-    const randomIndex = Math.floor(Math.random() * data.length);
-    setCurrentQuestion(data[randomIndex]);
-  };
-
-  /* creating the shuffle algorithm using Fisher-Yates Shuffle */
-  const shuffleArray = <T,>(arr: T[]): T[] => {
-    const shuffled = [...arr];
   
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  // Handling form submission
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const submittedAnswer = (
+      form.elements.namedItem("option") as HTMLInputElement
+    ).value;
+    if (submittedAnswer.length !== 0) {
+      getNextQuestion();
     }
-  
-    return shuffled;
+    form.reset();
+    console.log("Selected answer:", submittedAnswer);
   };
 
-  const correctAns = currentQuestion?.correctAnswer ?? "";
-  const incorrectAns = currentQuestion?.incorrectAnswers ?? [];
-
-  const options = shuffleArray([correctAns, ...incorrectAns]);
+ 
 
   return (
     <>
       {isLoading && <h2>Loading...</h2>}
-      {isError && <p>There was an error loading the data. Please try again later.</p>}
-      {!isLoading && !isError && currentQuestion && (
+      {isError && (
+        <p>There was an error loading the data. Please try again later.</p>
+      )}
+      {!isLoading && !isError && currentQues && (
         <div>
-          <p>{currentQuestion.question}</p>
-          <form>
+          <h2>Time: {time}</h2>
+          <p>{currentQues.question}</p>
+          <form onSubmit={handleSubmit}>
             {options.map((option, index) => (
               <div key={index}>
-                <input type="radio" id={`option-${index}`} name="option" value={option} />
+                <input
+                  type="radio"
+                  id={`option-${index}`}
+                  name="option"
+                  value={option}
+                />
                 <label htmlFor={`option-${index}`}>{option}</label>
               </div>
             ))}
+            <input type="submit" value="Submit" />
           </form>
-          <button onClick={getRandomQuestion}>Next</button>
         </div>
       )}
     </>
