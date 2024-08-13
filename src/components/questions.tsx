@@ -151,3 +151,9 @@ const Questions: React.FC = () => {
 };
 
 export default Questions;
+
+
+// in creating difficulty, pass the limit of questions as props
+//pass the time constraint also as prop
+//export the question component into a difficulty component
+// if any level is selected then than should influence the number of questions and the time required to answer each question
