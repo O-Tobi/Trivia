@@ -10,7 +10,12 @@ interface DataItem {
   category: string;
 }
 
-const Questions: React.FC = () => {
+interface PropsInterface {
+  numberOfQuestions: number; //number of questions directly from the api
+  durationForQuestions: number;
+}
+
+const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuestions}) => {
   const [data, setData] = useState<DataItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
@@ -55,7 +60,7 @@ const Questions: React.FC = () => {
     const timer = setTimeout(() => {
       getNextQuestion();
       setTotalQuestions((prevState) => prevState - 1);
-    }, 10000);
+    }, durationForQuestions);
 
     const interval = setInterval(() => {
       setTime((prevState) => prevState - 1);
@@ -65,14 +70,16 @@ const Questions: React.FC = () => {
       clearTimeout(timer);
       clearInterval(interval);
     };
-  }, [currentQuestion, getNextQuestion]);
+  }, [currentQuestion, getNextQuestion, durationForQuestions]);
+
+  
 
   // Fetching data from the EndPoint
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${apiUrl}?limit=5`);
+        const response = await fetch(`${apiUrl}?limit=${numberOfQuestions}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
