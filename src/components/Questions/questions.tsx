@@ -62,7 +62,7 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
     const timer = setTimeout(() => {
       getNextQuestion();
       setTotalQuestions((prevState) => prevState - 1);
-    }, durationForQuestions);
+    }, durationForQuestions*1000);
 
     const interval = setInterval(() => {
       setTime((prevState) => prevState - 1);
