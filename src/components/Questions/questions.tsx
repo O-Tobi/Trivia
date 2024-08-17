@@ -15,15 +15,17 @@ interface PropsInterface {
   durationForQuestions: number;
 }
 
+
+
 const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuestions}) => {
   const [data, setData] = useState<DataItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [currentQuestion, setCurrentQuestion] = useState<number>(0);
-  const [time, setTime] = useState<number>(10);
+  const [time, setTime] = useState<number>(durationForQuestions);
   const [options, setOptions] = useState<string[]>([]);
   const [score, setScore] = useState<number>(0);
-  const [totalQuestions, setTotalQuestions] = useState<number>(10);
+  const [totalQuestions, setTotalQuestions] = useState<number>(numberOfQuestions);
 
   // Shuffle array function using Fisher-Yates Algorithm
   const shuffleArray = <T,>(arr: T[]): T[] => {
