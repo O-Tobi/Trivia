@@ -74,7 +74,6 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
     };
   }, [currentQuestion, getNextQuestion, durationForQuestions]);
 
-  
 
   // Fetching data from the EndPoint
   useEffect(() => {
@@ -121,7 +120,7 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
     console.log("Selected answer:", submittedAnswer);
   };
 
-  const finalScore = (score / 10) * 100;
+  const finalScore = (score / totalQuestions) * 100;
 
   // use useMemo to stop questions from re-rendering if the dependencies are not changed
 
@@ -167,4 +166,4 @@ export default Questions;
 // in creating difficulty, pass the limit of questions as props
 //pass the time constraint also as prop
 //export the question component into a difficulty component
-// if any level is selected then than should influence the number of questions and the time required to answer each question
+// if any level is selected then that should influence the number of questions and the time required to answer each question

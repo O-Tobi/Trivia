@@ -1,12 +1,12 @@
 import React from 'react';
-import Difficulty from './components/Difficulty/difficulty';
+import Home from './components/Home/home';
 
 
 
 function App() {
   return (
     <div>
-      <Difficulty />
+      <Home />
     </div>
   );
 }
