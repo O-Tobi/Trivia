@@ -10,15 +10,26 @@ interface DataItem {
   category: string;
 }
 
-const Questions: React.FC = () => {
+interface PropsInterface {
+  numberOfQuestions: number; //number of questions directly from the api
+  durationForQuestions: number;
+}
+
+const Questions: React.FC<PropsInterface> = ({
+  numberOfQuestions,
+  durationForQuestions,
+}) => {
   const [data, setData] = useState<DataItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const [currentQuestion, setCurrentQuestion] = useState<number>(0);
-  const [time, setTime] = useState<number>(10);
+  const [time, setTime] = useState<number>(durationForQuestions);
   const [options, setOptions] = useState<string[]>([]);
   const [score, setScore] = useState<number>(0);
-  const [totalQuestions, setTotalQuestions] = useState<number>(10);
+  const [totalQuestions, setTotalQuestions] =
+    useState<number>(numberOfQuestions);
+  const [scoreDenominator, setScoreDenominator] =
+    useState<number>(numberOfQuestions);
 
   // Shuffle array function using Fisher-Yates Algorithm
   const shuffleArray = <T,>(arr: T[]): T[] => {
@@ -43,7 +54,7 @@ const Questions: React.FC = () => {
     setCurrentQuestion((prevIndex) => {
       const nextIndex = (prevIndex + 1) % data.length;
       setOptions(getShuffledOptions(data[nextIndex]));
-      setTime(10);
+      setTime(durationForQuestions);
       return nextIndex;
     });
   }, [data]);
@@ -55,7 +66,7 @@ const Questions: React.FC = () => {
     const timer = setTimeout(() => {
       getNextQuestion();
       setTotalQuestions((prevState) => prevState - 1);
-    }, 10000);
+    }, durationForQuestions * 1000);
 
     const interval = setInterval(() => {
       setTime((prevState) => prevState - 1);
@@ -65,14 +76,14 @@ const Questions: React.FC = () => {
       clearTimeout(timer);
       clearInterval(interval);
     };
-  }, [currentQuestion, getNextQuestion]);
+  }, [currentQuestion, getNextQuestion, durationForQuestions]);
 
   // Fetching data from the EndPoint
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch(`${apiUrl}?limit=5`);
+        const response = await fetch(`${apiUrl}?limit=${numberOfQuestions}`);
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
@@ -112,7 +123,10 @@ const Questions: React.FC = () => {
     console.log("Selected answer:", submittedAnswer);
   };
 
-  const finalScore = (score / 10) * 100;
+  const finalScore = Math.round((score / scoreDenominator) * 100);
+  console.log("totalquestion: ", scoreDenominator);
+
+  // use useMemo to stop questions from re-rendering if the dependencies are not changed
 
   return (
     <>
@@ -123,7 +137,7 @@ const Questions: React.FC = () => {
       {!isLoading && !isError && currentQues && totalQuestions > 0 && (
         <div>
           <h2>Time: {time}</h2>
-          <h3>Total Questions: {totalQuestions}</h3>
+          <h3>Questions Left: {totalQuestions}</h3>
           <h3>Score: {score}</h3>
           <p>{currentQues.question}</p>
           <form onSubmit={handleSubmit}>
@@ -152,8 +166,7 @@ const Questions: React.FC = () => {
 
 export default Questions;
 
-
 // in creating difficulty, pass the limit of questions as props
 //pass the time constraint also as prop
 //export the question component into a difficulty component
-// if any level is selected then than should influence the number of questions and the time required to answer each question
+// if any level is selected then that should influence the number of questions and the time required to answer each question
