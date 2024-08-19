@@ -15,9 +15,10 @@ interface PropsInterface {
   durationForQuestions: number;
 }
 
-
-
-const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuestions}) => {
+const Questions: React.FC<PropsInterface> = ({
+  numberOfQuestions,
+  durationForQuestions,
+}) => {
   const [data, setData] = useState<DataItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
@@ -25,7 +26,10 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
   const [time, setTime] = useState<number>(durationForQuestions);
   const [options, setOptions] = useState<string[]>([]);
   const [score, setScore] = useState<number>(0);
-  const [totalQuestions, setTotalQuestions] = useState<number>(numberOfQuestions);
+  const [totalQuestions, setTotalQuestions] =
+    useState<number>(numberOfQuestions);
+  const [scoreDenominator, setScoreDenominator] =
+    useState<number>(numberOfQuestions);
 
   // Shuffle array function using Fisher-Yates Algorithm
   const shuffleArray = <T,>(arr: T[]): T[] => {
@@ -50,7 +54,7 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
     setCurrentQuestion((prevIndex) => {
       const nextIndex = (prevIndex + 1) % data.length;
       setOptions(getShuffledOptions(data[nextIndex]));
-      setTime(10);
+      setTime(durationForQuestions);
       return nextIndex;
     });
   }, [data]);
@@ -62,7 +66,7 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
     const timer = setTimeout(() => {
       getNextQuestion();
       setTotalQuestions((prevState) => prevState - 1);
-    }, durationForQuestions*1000);
+    }, durationForQuestions * 1000);
 
     const interval = setInterval(() => {
       setTime((prevState) => prevState - 1);
@@ -73,7 +77,6 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
       clearInterval(interval);
     };
   }, [currentQuestion, getNextQuestion, durationForQuestions]);
-
 
   // Fetching data from the EndPoint
   useEffect(() => {
@@ -120,8 +123,8 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
     console.log("Selected answer:", submittedAnswer);
   };
 
-  const finalScore = (score / totalQuestions) * 100;
-  console.log('totalquestion: ', totalQuestions);
+  const finalScore = Math.round((score / scoreDenominator) * 100);
+  console.log("totalquestion: ", scoreDenominator);
 
   // use useMemo to stop questions from re-rendering if the dependencies are not changed
 
@@ -134,7 +137,7 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
       {!isLoading && !isError && currentQues && totalQuestions > 0 && (
         <div>
           <h2>Time: {time}</h2>
-          <h3>Total Questions: {totalQuestions}</h3>
+          <h3>Questions Left: {totalQuestions}</h3>
           <h3>Score: {score}</h3>
           <p>{currentQues.question}</p>
           <form onSubmit={handleSubmit}>
@@ -162,7 +165,6 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
 };
 
 export default Questions;
-
 
 // in creating difficulty, pass the limit of questions as props
 //pass the time constraint also as prop
