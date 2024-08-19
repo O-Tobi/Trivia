@@ -121,6 +121,7 @@ const Questions: React.FC<PropsInterface>= ({numberOfQuestions, durationForQuest
   };
 
   const finalScore = (score / totalQuestions) * 100;
+  console.log('totalquestion: ', totalQuestions);
 
   // use useMemo to stop questions from re-rendering if the dependencies are not changed
 
