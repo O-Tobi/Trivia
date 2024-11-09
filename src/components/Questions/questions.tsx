@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 
 const apiUrl = process.env.REACT_APP_API_URL;
 
@@ -30,6 +30,7 @@ const Questions: React.FC<PropsInterface> = ({
     useState<number>(numberOfQuestions);
   const [scoreDenominator, setScoreDenominator] =
     useState<number>(numberOfQuestions);
+  const formRef = useRef<HTMLFormElement>(null)
 
   // Shuffle array function using Fisher-Yates Algorithm
   const shuffleArray = <T,>(arr: T[]): T[] => {
@@ -61,6 +62,11 @@ const Questions: React.FC<PropsInterface> = ({
 
   const currentQues = data[currentQuestion];
 
+  
+ const formClear = () => {
+  formRef.current?.reset();
+ };
+
   // Timer and Interval for question timeout
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -72,11 +78,18 @@ const Questions: React.FC<PropsInterface> = ({
       setTime((prevState) => prevState - 1);
     }, 1000);
 
+    //Clear out any unsubmitted options once the timer runs out
+    if (time === 0) {
+      formClear();
+      getNextQuestion();
+      setTotalQuestions((prevState) => prevState - 1)
+    }
+
     return () => {
       clearTimeout(timer);
       clearInterval(interval);
     };
-  }, [currentQuestion, getNextQuestion, durationForQuestions]);
+  }, [currentQuestion, getNextQuestion, durationForQuestions, time]);
 
   // Fetching data from the EndPoint
   useEffect(() => {
@@ -99,32 +112,33 @@ const Questions: React.FC<PropsInterface> = ({
     };
 
     fetchData();
-  }, []);
+  }, [numberOfQuestions]);
 
   // Handling form submission and Score Checker
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
-    const submittedAnswer = (
+    const selectedAnswer = (
       form.elements.namedItem("option") as HTMLInputElement
     ).value;
     const rightAns = currentQues.correctAnswer;
 
-    if (submittedAnswer === rightAns) {
+    //if correct answer is selected
+    if (selectedAnswer === rightAns) {
       setScore((prevState) => prevState + 1);
       getNextQuestion();
       setTotalQuestions((prevState) => prevState - 1);
-    } else if (submittedAnswer.length !== 0) {
+    }
+    //If the wrong answer is selected
+    else if (selectedAnswer.length !== 0) {
       getNextQuestion();
       setTotalQuestions((prevState) => prevState - 1);
     }
 
-    form.reset();
-    console.log("Selected answer:", submittedAnswer);
+    formRef?.current?.reset();
   };
 
   const finalScore = Math.round((score / scoreDenominator) * 100);
-  console.log("totalquestion: ", scoreDenominator);
 
   // use useMemo to stop questions from re-rendering if the dependencies are not changed
 
@@ -140,7 +154,7 @@ const Questions: React.FC<PropsInterface> = ({
           <h3>Questions Left: {totalQuestions}</h3>
           <h3>Score: {score}</h3>
           <p>{currentQues.question}</p>
-          <form onSubmit={handleSubmit}>
+          <form ref={formRef} onSubmit={handleSubmit}>
             {options.map((option, index) => (
               <div key={index}>
                 <input
