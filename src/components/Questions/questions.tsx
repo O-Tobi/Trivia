@@ -103,6 +103,7 @@ const Questions: React.FC<PropsInterface> = ({
         const accessedData = await response.json();
         setData(accessedData);
         setOptions(getShuffledOptions(accessedData[0]));
+        setScoreDenominator(numberOfQuestions)
       } catch (error) {
         setIsError(true);
         console.error("Fetching error:", error);

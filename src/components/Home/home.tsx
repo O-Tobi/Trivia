@@ -1,5 +1,6 @@
 import React from "react";
 import { Outlet, NavLink } from "react-router-dom";
+import ButtonComponent from "./Button";
 
 
 const Home: React.FC = () => {
@@ -16,6 +17,9 @@ const Home: React.FC = () => {
       <button>
         <NavLink to="hard">Hard</NavLink>
       </button>
+
+      <ButtonComponent label="test"/>
+
 
       <Outlet />
     </>

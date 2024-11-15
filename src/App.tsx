@@ -1,9 +1,10 @@
 import React from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./components/Home/home";
-import Easy from "./components/Home/easy";
-import Medium from "./components/Home/medium";
-import Hard from "./components/Home/hard";
+import Home from "./components/Home/Home";
+import Easy from "./components/Home/Easy";
+import Medium from "./components/Home/Medium";
+import Hard from "./components/Home/Hard";
+
 
 function App() {
   return (
