@@ -3,9 +3,13 @@ import { Outlet, NavLink } from "react-router-dom";
 import ButtonComponent from "./Button";
 
 
+
+
 const Home: React.FC = () => {
+  
+  
   return (
-    <>
+    <div>
       <h1>Welcome to Trivia</h1>
       <p>Choose your difficulty level</p>
       <button>
@@ -18,12 +22,13 @@ const Home: React.FC = () => {
         <NavLink to="hard">Hard</NavLink>
       </button>
 
-      <ButtonComponent label="test"/>
+      <ButtonComponent label="Darkmode"/>
 
 
       <Outlet />
-    </>
-  );
+    </div>
+  )
+
 };
 
 export default Home;
