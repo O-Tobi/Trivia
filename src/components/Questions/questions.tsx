@@ -143,6 +143,8 @@ const Questions: React.FC<PropsInterface> = ({
 
   // use useMemo to stop questions from re-rendering if the dependencies are not changed
 
+  // after the final result, ask if the user will like to go again or change difficulty and rerender the questions
+
   return (
     <>
       {isLoading && <h2>Loading...</h2>}
